@@ -2,11 +2,13 @@ const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const express = require("express");
 require("dotenv").config({ path: ".env.local" });
 const cors = require("cors");
+const cookieParser = require("cookie-parser");
 const app = express();
 const port = process.env.PORT || 5000;
 
-app.use(cors());
+app.use(cors({ origin: "http://localhost:3000", credentials: true }));
 app.use(express.json());
+app.use(cookieParser());
 
 const uri = process.env.MONGODB_URI;
 
@@ -37,6 +39,13 @@ async function run() {
         if (user.password !== password) {
           return res.status(401).json({ message: "Invalid password" });
         }
+
+        res.cookie("userEmail", user.email, {
+          httpOnly: false,
+          secure: false,
+          maxAge: 86400000,
+          sameSite: "lax",
+        });
 
         res.status(200).json({
           message: "Login successful",
