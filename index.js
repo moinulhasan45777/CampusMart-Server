@@ -69,6 +69,21 @@ async function run() {
       }
     });
 
+    app.get("/items/:id", async (req, res) => {
+      try {
+        const id = req.params.id;
+        const query = { _id: new ObjectId(id) };
+        const result = await itemsCollection.findOne(query);
+        if (result) {
+          res.send(result);
+        } else {
+          res.status(404).json({ message: "Item not found" });
+        }
+      } catch (error) {
+        res.status(500).json({ message: "Server error", error: error.message });
+      }
+    });
+
     app.post("/items", async (req, res) => {
       try {
         const newItem = {
