@@ -25,6 +25,7 @@ async function run() {
     const db = client.db("campusmart");
 
     const usersCollection = db.collection("users");
+    const itemsCollection = db.collection("items");
 
     app.post("/login", async (req, res) => {
       const { email, password } = req.body;
@@ -53,6 +54,29 @@ async function run() {
             email: user.email,
           },
         });
+      } catch (error) {
+        res.status(500).json({ message: "Server error", error: error.message });
+      }
+    });
+
+    app.get("/items", async (req, res) => {
+      try {
+        const cursor = itemsCollection.find().sort({ createdAt: -1 });
+        const result = await cursor.toArray();
+        res.send(result);
+      } catch (error) {
+        res.status(500).json({ message: "Server error", error: error.message });
+      }
+    });
+
+    app.post("/items", async (req, res) => {
+      try {
+        const newItem = {
+          ...req.body,
+          createdAt: new Date(),
+        };
+        const result = await itemsCollection.insertOne(newItem);
+        res.send(result);
       } catch (error) {
         res.status(500).json({ message: "Server error", error: error.message });
       }
